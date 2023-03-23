@@ -1,11 +1,23 @@
 ﻿using Client.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace Client.Controllers
 {
 	public class SignInController : Controller
 	{
+		private readonly HttpClient client = null;
+		
+		public SignInController()
+		{
+			client = new HttpClient();
+			client = new HttpClient();
+			var contentType = new MediaTypeWithQualityHeaderValue("application/json");
+			client.BaseAddress = new Uri("http://localhost:5281/");
+			client.DefaultRequestHeaders.Accept.Add(contentType);
+		}
+		
 		public IActionResult Index()
 		{
 			return View();
