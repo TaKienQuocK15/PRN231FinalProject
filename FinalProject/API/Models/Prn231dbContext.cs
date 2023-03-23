@@ -19,8 +19,6 @@ public partial class Prn231dbContext : DbContext
 
     public virtual DbSet<Class> Classes { get; set; }
 
-    public virtual DbSet<ClassStudent> ClassStudents { get; set; }
-
     public virtual DbSet<Student> Students { get; set; }
 
     public virtual DbSet<Teacher> Teachers { get; set; }
@@ -32,7 +30,9 @@ public partial class Prn231dbContext : DbContext
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
         IConfigurationRoot configuration = builder.Build();
         optionsBuilder.UseSqlServer(configuration.GetConnectionString("MyStoreDB"));
+
     }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -69,27 +69,26 @@ public partial class Prn231dbContext : DbContext
                 .HasForeignKey(d => d.TeacherId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Class_Teacher");
-        });
 
-        modelBuilder.Entity<ClassStudent>(entity =>
-        {
-            entity
-                .HasNoKey()
-                .ToTable("Class_Student");
-
-            entity.Property(e => e.StudentId)
-                .HasMaxLength(8)
-                .IsFixedLength();
-
-            entity.HasOne(d => d.Class).WithMany()
-                .HasForeignKey(d => d.ClassId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Class_Student_Class");
-
-            entity.HasOne(d => d.Student).WithMany()
-                .HasForeignKey(d => d.StudentId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Class_Student_Student");
+            entity.HasMany(d => d.Students).WithMany(p => p.Classes)
+                .UsingEntity<Dictionary<string, object>>(
+                    "ClassStudent",
+                    r => r.HasOne<Student>().WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("FK_Class_Student_Student"),
+                    l => l.HasOne<Class>().WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("FK_Class_Student_Class"),
+                    j =>
+                    {
+                        j.HasKey("ClassId", "StudentId");
+                        j.ToTable("Class_Student");
+                        j.IndexerProperty<string>("StudentId")
+                            .HasMaxLength(8)
+                            .IsFixedLength();
+                    });
         });
 
         modelBuilder.Entity<Student>(entity =>

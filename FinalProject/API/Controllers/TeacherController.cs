@@ -10,12 +10,12 @@ namespace API.Controllers
         private Prn231dbContext dbContext = new Prn231dbContext();
 
         [HttpGet]
-        public IActionResult getTeachers()
+        public IActionResult GetTeachers()
         {
             return Ok(dbContext.Teachers.ToList());
         }
-        /*[HttpPost]
-        public IActionResult addTeacher(Teacher t)
+        [HttpPost]
+        public IActionResult AddTeacher(Teacher t)
         {
             var teacher = new Teacher()
             {
@@ -24,6 +24,11 @@ namespace API.Controllers
             dbContext.Teachers.Add(teacher);
             dbContext.SaveChanges();
             return Ok(teacher);
-        }*/
+        }
+        [HttpGet]
+        public IActionResult GetTeacherById(int id)
+        {
+            return Ok(dbContext.Teachers.FirstOrDefault(t => t.Id == id));
+        }
     }
 }

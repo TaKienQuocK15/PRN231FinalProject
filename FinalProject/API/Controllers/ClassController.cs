@@ -19,7 +19,7 @@ namespace API.Controllers
         }
         
         [HttpGet]
-        public IActionResult getClass()
+        public IActionResult GetClasses()
         {
             List<Class> cList = dbContext.Classes
                 .Include(o => o.Teacher).ToList();
@@ -33,21 +33,40 @@ namespace API.Controllers
         }
         [HttpGet]
         [Route("{id}")]
-        public IActionResult getStudentsByClassId(int id)
+        public IActionResult GetStudentsByClassId(int id)
         {
-            var studentList = dbContext.ClassStudents.
-                Where(c => c.ClassId == id).Select(c => new
-            {
-                studentId = c.StudentId,
-                studentName = c.Student.Name,
-                /*Account = c.Student.Accounts.
-                Select(s => new
+            var studentList = dbContext.Classes.Include(c => c.Students).
+                SingleOrDefault(c => c.Id == id).Students.Select(s => new Student
                 {
-                    email = s.Email
-                })*/
-                }
-            );
+                    Id = s.Id,
+                    Name = s.Name,
+                });
             return Ok(studentList);
+        }
+        
+        [HttpPost]
+        [Route("{studentId}/{classId}")]
+        public IActionResult AddStudentToClass(string studentId, int classId)
+        {
+            var student = dbContext.Students.SingleOrDefault(s => s.Id.Equals(studentId));
+            var clss = dbContext.Classes.SingleOrDefault(c => c.Id == classId);
+            clss.Students.Add(student);
+            student.Classes.Add(clss);
+            dbContext.SaveChanges();
+            return Ok(student + " " + clss);
+        }
+
+        [HttpPost]
+        public IActionResult AddClass(Class c)
+        {
+            var newClass = new Class()
+            {
+                Name = c.Name,
+                TeacherId = c.TeacherId
+            };
+            dbContext.Classes.Add(newClass);
+            dbContext.SaveChanges();
+            return Ok(newClass);
         }
     }
 }
