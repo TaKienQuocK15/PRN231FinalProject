@@ -1,32 +1,36 @@
 ﻿using Client.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
 namespace Client.Controllers
 {
 	public class HomeController : Controller
 	{
-		private readonly ILogger<HomeController> _logger;
-
-		public HomeController(ILogger<HomeController> logger)
-		{
-			_logger = logger;
-		}
-
-		public IActionResult Index()
+		public IActionResult SignIn()
 		{
 			return View();
 		}
 
-		public IActionResult Privacy()
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public IActionResult SignIn([Bind]Account account)
 		{
-			return View();
-		}
+			if (!ModelState.IsValid)
+				return View(account);
+			
+			using (var db = new Prn231dbContext())
+			{
+				Account a = db.Accounts.SingleOrDefault(a1 => a1.Email.Equals(account.Email) 
+					&& a1.Password.Equals(account.Password));
+				
+				if (a == null)
+				{
+					ViewData["msg"] = "Wrong email or password";
+					return View(account);
+				}
 
-		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-		public IActionResult Error()
-		{
-			return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+				ViewData["msg"] = "Login success";
+				return View(account);
+			}
 		}
 	}
 }
