@@ -1,5 +1,6 @@
 ﻿using API.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -22,7 +23,20 @@ namespace API.Controllers
             var student = dbContext.Students.SingleOrDefault(s => s.Id.Equals(id));
             return Ok(student);
         }
-
+        [HttpGet]
+        [Route("{id}")]
+        public IActionResult GetClassesByStudentId(string id)
+        {
+            var studentList = dbContext.Students.
+                Include(s => s.Classes).
+                SingleOrDefault(c => c.Id.Equals(id)).
+                Classes.Select(s => new Class
+                {
+                    Id = s.Id,
+                    Name = s.Name
+                });
+            return Ok(studentList);
+        }
         [HttpPost]
         public IActionResult AddStudent(Student s)
             {
