@@ -1,0 +1,22 @@
+﻿@model Client.Models.Account;
+
+<div id="form">
+    <div id="form-title">
+        <span><a href="#">SIGN UP</a></span>
+        <span><a href="#" style="color: red;">SIGN IN</a></span>
+    </div>
+    <div id="form-content">
+        <div class="msg-error" style="text-align:left">
+            @ViewData["msg"]
+        </div>
+        <form method="post">
+            <label>Email<span style="color: red;">*</span></label><br />
+            <input asp-for="@Model.Email" /><br />
+            <span class="msg-error" asp-validation-for="@Model.Email"></span><br />
+            <label>Password<span style="color: red;">*</span></label><br />
+            <input asp-for="@Model.Password" /><br />
+            <span class="msg-error" asp-validation-for="@Model.Password"></span><br />
+            <input type="submit" value="SIGN IN" /><br />
+        </form>
+    </div>
+</div>
