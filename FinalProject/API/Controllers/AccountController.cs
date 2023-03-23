@@ -16,6 +16,8 @@ namespace API.Controllers
         {
             var account = dbContext.Accounts
                 .SingleOrDefault(a => a.Email.Equals(email));
+            if (account == null)
+                return NotFound();
             return Ok(account);
         }
         [HttpGet]
