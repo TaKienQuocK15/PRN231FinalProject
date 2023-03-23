@@ -19,6 +19,7 @@ namespace API.Controllers
             return Ok(account);
         }
         [HttpGet]
+        [Route("{id}")]
         public IActionResult GetStudentByAccountId(int id)
         {
             var account = dbContext.Accounts.SingleOrDefault(a => a.Id == id);
@@ -33,6 +34,7 @@ namespace API.Controllers
             return Ok(student);
         }
         [HttpGet]
+        [Route("{id}")]
         public IActionResult GetTeacherByAccountId(int id)
         {
             var account = dbContext.Accounts.SingleOrDefault(a => a.Id == id);
