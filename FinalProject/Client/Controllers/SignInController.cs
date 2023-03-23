@@ -1,18 +1,19 @@
 ﻿using Client.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace Client.Controllers
 {
-	public class HomeController : Controller
+	public class SignInController : Controller
 	{
-		public IActionResult SignIn()
+		public IActionResult Index()
 		{
 			return View();
 		}
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public IActionResult SignIn([Bind]Account account)
+		public IActionResult Index([Bind]Account account)
 		{
 			if (!ModelState.IsValid)
 				return View(account);
@@ -29,9 +30,10 @@ namespace Client.Controllers
 				}
 				else
 				{
+					HttpContext.Session.SetString("AccountSession", JsonSerializer.Serialize(a));
 					if (a.Role == 1)
 						return RedirectToAction("Index", "Teacher");
-					else return RedirectToPage("/student");
+					else return RedirectToAction("Index", "Student");
 				}
 			}
 		}
