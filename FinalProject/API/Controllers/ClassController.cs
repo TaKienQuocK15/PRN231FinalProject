@@ -35,8 +35,10 @@ namespace API.Controllers
         [Route("{id}")]
         public IActionResult GetStudentsByClassId(int id)
         {
-            var studentList = dbContext.Classes.Include(c => c.Students).
-                SingleOrDefault(c => c.Id == id).Students.Select(s => new Student
+            var studentList = dbContext.Classes.
+                Include(s => s.Students).
+                SingleOrDefault(c => c.Id == id).
+                Students.Select(s => new Student
                 {
                     Id = s.Id,
                     Name = s.Name,
@@ -55,18 +57,58 @@ namespace API.Controllers
             dbContext.SaveChanges();
             return Ok(student + " " + clss);
         }
-
         [HttpPost]
-        public IActionResult AddClass(Class c)
+        public IActionResult AddClass(Class c, int tId)
         {
             var newClass = new Class()
             {
                 Name = c.Name,
-                TeacherId = c.TeacherId
+                TeacherId = tId
             };
             dbContext.Classes.Add(newClass);
             dbContext.SaveChanges();
             return Ok(newClass);
+        }
+        [HttpGet]
+        public IActionResult GetClassById(int id)
+        {
+            var clss = dbContext.Classes.SingleOrDefault(c => c.Id == id);
+            return Ok(clss);
+        }
+        [HttpPost]
+        [Route("{classId}")]
+        public IActionResult DeleteClass(int classId)
+        {
+            var clss = dbContext.Classes.SingleOrDefault(c => c.Id == classId);
+            List<Student> studentList = dbContext.Classes.
+                Include(c => c.Students).
+                SingleOrDefault(c => c.Id == classId).Students.ToList();
+
+            foreach(Student s in studentList.ToList())
+            {
+
+                studentList.Remove(s);
+                s.Classes.Remove(clss);
+                dbContext.SaveChanges();
+            }
+            
+            dbContext.Classes.Remove(clss);
+            dbContext.SaveChanges();
+            return Ok("Deleted");
+        }
+        [HttpPost]
+        [Route("{studentId}/{classId}")]
+        public IActionResult RemoveStudentFromClass(string studentId, int classId)
+        {
+            var clss = dbContext.Classes.SingleOrDefault(c => c.Id == classId);
+            List<Student> studentList = dbContext.Classes.
+                Include(c => c.Students).
+                SingleOrDefault(c => c.Id == classId).Students.ToList();
+            var student = studentList.SingleOrDefault(s => s.Id.Equals(studentId));
+            studentList.Remove(student);
+            student.Classes.Remove(clss);
+            dbContext.SaveChanges();
+            return Ok("Deleted");
         }
     }
 }
