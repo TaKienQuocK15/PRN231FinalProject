@@ -13,10 +13,8 @@ namespace Client.Controllers
 				return null;
 			Account account = JsonSerializer.Deserialize<Account>(str);
 			Teacher teacher = new Prn231dbContext().Teachers.SingleOrDefault(t => t.Id == account.Id);
-
 			return teacher;
 		}
-		
 		public IActionResult Index()
 		{
 			Teacher? teacher = GetTeacherFromSession();
