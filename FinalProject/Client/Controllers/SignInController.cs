@@ -1,11 +1,23 @@
 ﻿using Client.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace Client.Controllers
 {
 	public class SignInController : Controller
 	{
+		private readonly HttpClient client = null;
+		
+		public SignInController()
+		{
+			client = new HttpClient();
+			client = new HttpClient();
+			var contentType = new MediaTypeWithQualityHeaderValue("application/json");
+			client.BaseAddress = new Uri("http://localhost:5143/");
+			client.DefaultRequestHeaders.Accept.Add(contentType);
+		}
+		
 		public IActionResult Index()
 		{
 			return View();
@@ -17,24 +29,39 @@ namespace Client.Controllers
 		{
 			if (!ModelState.IsValid)
 				return View(account);
-			
-			using (var db = new Prn231dbContext())
+
+			Account? a;
+			HttpResponseMessage response = client
+				.GetAsync("api/account/GetAccountByEmail/" + account.Email)
+				.GetAwaiter().GetResult();
+			if (response.IsSuccessStatusCode)
 			{
-				Account a = db.Accounts.SingleOrDefault(a1 => a1.Email.Equals(account.Email) 
-					&& a1.Password.Equals(account.Password));
-				
-				if (a == null)
+				string strData = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+				var options = new JsonSerializerOptions
 				{
-					ViewData["msg"] = "Wrong email or password";
+					PropertyNameCaseInsensitive = true
+				};
+				a = JsonSerializer.Deserialize<Account>(strData, options);
+			}
+			else a = null;
+
+			if (a == null)
+			{
+				ViewData["msg"] = "Account does not exist";
+				return View(account);
+			}
+			else
+			{
+				if (!a.Password.Equals(account.Password))
+				{
+					ViewData["msg"] = "Wrong password";
 					return View(account);
 				}
-				else
-				{
-					HttpContext.Session.SetString("AccountSession", JsonSerializer.Serialize(a));
-					if (a.Role == 1)
-						return RedirectToAction("Index", "Teacher");
-					else return RedirectToAction("Index", "Student");
-				}
+				
+				HttpContext.Session.SetString("AccountSession", JsonSerializer.Serialize(a));
+				if (a.Role == 1)
+					return RedirectToAction("Index", "Teacher");
+				else return RedirectToAction("Index", "Student");
 			}
 		}
 	}
