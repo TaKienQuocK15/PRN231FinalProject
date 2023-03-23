@@ -32,5 +32,19 @@ namespace API.Controllers
                 ;
             return Ok(student);
         }
+        [HttpGet]
+        public IActionResult GetTeacherByAccountId(int id)
+        {
+            var account = dbContext.Accounts.SingleOrDefault(a => a.Id == id);
+            var teacher = dbContext.Teachers
+                .Select(s => new Teacher
+                {
+                    Id = s.Id,
+                    Name = s.Name
+                })
+                .SingleOrDefault(s => s.Id.Equals(account.TeacherId))
+                ;
+            return Ok(teacher);
+        }
     }
 }
