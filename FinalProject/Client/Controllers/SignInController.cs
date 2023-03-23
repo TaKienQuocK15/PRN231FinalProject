@@ -12,7 +12,6 @@ namespace Client.Controllers
 		public SignInController()
 		{
 			client = new HttpClient();
-			client = new HttpClient();
 			var contentType = new MediaTypeWithQualityHeaderValue("application/json");
 			client.BaseAddress = new Uri("http://localhost:5143/");
 			client.DefaultRequestHeaders.Accept.Add(contentType);
@@ -59,7 +58,7 @@ namespace Client.Controllers
 				}
 				
 				HttpContext.Session.SetString("AccountSession", JsonSerializer.Serialize(a));
-				if (a.Role == 1)
+				if (a.Role == 2)
 					return RedirectToAction("Index", "Teacher");
 				else return RedirectToAction("Index", "Student");
 			}
