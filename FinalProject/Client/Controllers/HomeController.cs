@@ -27,9 +27,12 @@ namespace Client.Controllers
 					ViewData["msg"] = "Wrong email or password";
 					return View(account);
 				}
-
-				ViewData["msg"] = "Login success";
-				return View(account);
+				else
+				{
+					if (a.Role == 1)
+						return RedirectToAction("Index", "Teacher");
+					else return RedirectToPage("/student");
+				}
 			}
 		}
 	}
