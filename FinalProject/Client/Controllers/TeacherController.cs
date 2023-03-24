@@ -155,19 +155,122 @@ namespace Client.Controllers
 			}
 			else return students;
 		}
+		List<Student>? GetStudents()
+		{
+			HttpResponseMessage response = client
+				.GetAsync("api/Student/GetStudents")
+				.GetAwaiter()
+				.GetResult();
+			List<Student> students;
+			if (response.IsSuccessStatusCode)
+			{
+				string strData = response.Content.ReadAsStringAsync()
+					.GetAwaiter()
+					.GetResult();
+				var options = new JsonSerializerOptions
+				{
+					PropertyNameCaseInsensitive = true
+				};
+                students = JsonSerializer.Deserialize<List<Student>>(strData, options);
+                return students;
+            }
+            else
+                students = null;
+            if (students == null)
+            {
+                ViewData["msg"] = "All Students are added";
+                return null;
+            }
+            else return students;
+        }
+		Student? GetStudentById(string id)
+		{
+			HttpResponseMessage response = client
+				.GetAsync("api/Student/GetStudentById/" + id)
+                .GetAwaiter()
+                .GetResult();
+			Student student;
+            if (response.IsSuccessStatusCode)
+            {
+                string strData = response.Content.ReadAsStringAsync()
+                    .GetAwaiter()
+                    .GetResult();
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+                student = JsonSerializer.Deserialize<Student>(strData, options);
+                return student;
+            }
+            else
+                student = null;
+            if (student == null)
+            {
+                ViewData["msg"] = "Unable to find students";
+                return null;
+            }
+            else return student;
+
+        }
 		public async Task<IActionResult> ClassDetails(int id)
 		{
-            
-            Class? c = GetClassById(id);
-			if (c == null) return NotFound();
+
+			Class? c = GetClassById(id);
+			/*if (c == null) return NotFound();*/
 			List<Student> students = GetStudentsByClassId(c.Id);
+			List<Student> newStudents = GetStudents();
+			foreach (Student s in students)
+			{
+				foreach (Student ns in newStudents)
+				{
+					if (s.Id.Equals(ns.Id))
+					{
+						newStudents.Remove(ns);
+						break;
+					}
+				}
+			}
 			var viewModel = new ClassViewModel
 			{
 				Class = c,
-				Students = students
+				Students = students,
+				newStudents = newStudents
+			
             };
             return View(viewModel);
 		}
 
+		public async Task<IActionResult> AddStudentToClass(string id, int id2)
+		{
+			string studentId = id;
+			int classId = id2;
+
+            HttpResponseMessage response = client
+                .PostAsync("api/Class/AddStudentToClass/" + studentId + "/" + classId, null)
+                .GetAwaiter()
+                .GetResult();
+			if (response.IsSuccessStatusCode)
+			{
+				return RedirectToAction("ClassDetails", new { id = classId });
+			}
+			else return BadRequest();
+            /*return View();*/
+		}
+        public async Task<IActionResult> RemoveStudentFromClass(string id, int id2)
+        {
+            string studentId = id;
+            int classId = id2;
+
+            HttpResponseMessage response = client
+                .DeleteAsync("api/Class/RemoveStudentFromClass/" + studentId + "/" + classId)
+                .GetAwaiter()
+                .GetResult();
+            if (response.IsSuccessStatusCode)
+            {
+                return RedirectToAction("ClassDetails", new { id = classId });
+            }
+            else return BadRequest();
+            /*return View();*/
+        }
     }
 }
