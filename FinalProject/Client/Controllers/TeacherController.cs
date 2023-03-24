@@ -158,24 +158,10 @@ namespace Client.Controllers
 			if (c == null) return NotFound();
 
 			List<Student> students = GetStudentsByClassId(c.Id);
-			List<Student> newStudents = GetStudents();
-			foreach (Student s in students)
-			{
-				foreach (Student ns in newStudents)
-				{
-					if (s.Id.Equals(ns.Id))
-					{
-						newStudents.Remove(ns);
-						break;
-					}
-				}
-			}
 			var viewModel = new ClassViewModel
 			{
 				Class = c,
-				Students = students,
-				newStudents = newStudents
-			
+				Students = students
             };
             return View(viewModel);
 		}
