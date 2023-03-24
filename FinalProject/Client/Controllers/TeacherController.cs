@@ -166,5 +166,38 @@ namespace Client.Controllers
             return View(viewModel);
 		}
 
+		public async Task<IActionResult> AddStudentToClass(string id, int id2)
+		{
+			string studentId = id;
+			int classId = id2;
+
+            HttpResponseMessage response = client
+                .PostAsync("api/Class/AddStudentToClass/" + studentId + "/" + classId, null)
+                .GetAwaiter()
+                .GetResult();
+			if (response.IsSuccessStatusCode)
+			{
+				return RedirectToAction("ClassDetails", new { id = classId });
+			}
+			else return BadRequest();
+            /*return View();*/
+		}
+        public async Task<IActionResult> RemoveStudentFromClass(string id, int id2)
+        {
+            string studentId = id;
+            int classId = id2;
+
+            HttpResponseMessage response = client
+                .DeleteAsync("api/Class/RemoveStudentFromClass/" + studentId + "/" + classId)
+                .GetAwaiter()
+                .GetResult();
+            if (response.IsSuccessStatusCode)
+            {
+                return RedirectToAction("ClassDetails", new { id = classId });
+            }
+            else return BadRequest();
+
+            /*return View();*/
+        }
     }
 }
