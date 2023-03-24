@@ -1,0 +1,54 @@
+﻿@model Client.Models.ClassViewModel;
+
+
+<h1>Class Details</h1>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-4">
+            @Html.DisplayNameFor(model => model.Class.Id)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.Class.Id)
+        </dd>
+        <dt class="col-sm-4">
+            @Html.DisplayNameFor(model => model.Class.Name)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.Class.Name)
+        </dd>
+    </dl>
+    <table class="table">
+    <thead>
+        <tr>
+            <th>
+                <p>Id</p>
+            </th>
+            <th>
+                <p>Name</p>
+            </th>
+            <th>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Students)
+        {
+           <tr>
+               <td>
+                   @Html.DisplayFor(s => item.Id);
+               </td>
+                <td>
+                    @Html.DisplayFor(s => item.Name);
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new{ /* id = item.PrimaryKey */})
+                    @Html.ActionLink("Details", "Details", new{  id = item.Id })
+                    @Html.ActionLink("Delete", "Delete", new{ /* id = item.PrimaryKey */})
+                </td>
+            </tr> 
+        }
+    </tbody>
+    </table>
+</div>
+

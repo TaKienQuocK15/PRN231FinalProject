@@ -27,6 +27,7 @@ namespace API.Controllers
             return Ok(teacher);
         }
         [HttpGet]
+        [Route("{id}")]
         public IActionResult GetTeacherById(int id)
         {
             return Ok(dbContext.Teachers.FirstOrDefault(t => t.Id == id));

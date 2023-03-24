@@ -70,6 +70,7 @@ namespace API.Controllers
             return Ok(newClass);
         }
         [HttpGet]
+        [Route("{id}")]
         public IActionResult GetClassById(int id)
         {
             var clss = dbContext.Classes.SingleOrDefault(c => c.Id == id);
