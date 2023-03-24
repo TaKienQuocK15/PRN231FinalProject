@@ -19,35 +19,17 @@ namespace Client.Controllers
             client.DefaultRequestHeaders.Accept.Add(contentType);
         }
 
-        public async Task<IActionResult> Index()
-        {
-            /*HttpResponseMessage response = await client.GetAsync(teacherApiUrl);
-			string strData = await response.Content.ReadAsStringAsync();
-
-			var options = new JsonSerializerOptions
-			{
-				PropertyNameCaseInsensitive = true
-			};
-			List<Teacher> teachers = JsonSerializer.Deserialize<List<Teacher>>(strData, options);*/
-            Teacher? teacher = GetTeacherFromSession();
-			List<Class>? classes = GetClassesByTeacherId(teacher.Id);
-            if (teacher == null)
-                return RedirectToAction("Index", "SignIn");
-            var viewModel = new TeacherViewModel
-			{
-                Teacher = teacher,
-                Classes = classes
-			};
-			
-            return View(viewModel);
-        }
-        Teacher? GetTeacherFromSession()
+		Teacher? GetTeacherFromSession()
 		{
 			string str = HttpContext.Session.GetString("AccountSession");
 			if (str == null)
 				return null;
+			
 			Account account = JsonSerializer.Deserialize<Account>(str);
-			Teacher teacher;
+			if (account.TeacherId == null)
+				return null;
+
+			Teacher? teacher;
 			HttpResponseMessage response = client
 				.GetAsync("api/Teacher/GetTeacherById/" + account.TeacherId)
 				.GetAwaiter()
@@ -63,23 +45,20 @@ namespace Client.Controllers
 				};
 				teacher = JsonSerializer.Deserialize<Teacher>(strData, options);
 			}
-            else teacher = null;
-			if(teacher == null)
-			{
-				ViewData["msg"] = "wtf bro there's nothing";
-				return null;
-			}else
-            return teacher;
+			else teacher = null;
+			
+			return teacher;
 		}
+
 		List<Class>? GetClassesByTeacherId(int id)
 		{
 			HttpResponseMessage response = client
 				.GetAsync("api/Teacher/GetClassesByTeacherId/" + id)
 				.GetAwaiter()
 				.GetResult();
-			List<Class> classes;
+			List<Class>? classes;
 
-            if (response.IsSuccessStatusCode)
+			if (response.IsSuccessStatusCode)
 			{
 				string strData = response.Content.ReadAsStringAsync()
 					.GetAwaiter()
@@ -92,48 +71,41 @@ namespace Client.Controllers
 				return classes;
 			}
 			else classes = null;
-			if (classes == null)
+			
+			return classes;
+		}
+
+		Class? GetClassById(int id)
+		{
+			HttpResponseMessage response = client
+				.GetAsync("api/Class/GetClassById/" + id)
+				.GetAwaiter()
+				.GetResult();
+			Class? classDetail;
+			if (response.IsSuccessStatusCode)
 			{
-				ViewData["msg"] = "No Classes";
-				return null;
+				string strData = response.Content.ReadAsStringAsync()
+					.GetAwaiter()
+					.GetResult();
+				var options = new JsonSerializerOptions
+				{
+					PropertyNameCaseInsensitive = true
+				};
+				classDetail = JsonSerializer.Deserialize<Class>(strData, options);
+				return classDetail;
 			}
 			else
-				return classes;
+				classDetail = null;
+			
+			return classDetail;
 		}
-        Class? GetClassById(int id)
-        {
-            HttpResponseMessage response = client
-                .GetAsync("api/Class/GetClassById/" + id)
-                .GetAwaiter()
-                .GetResult();
-            Class classDetail;
-            if (response.IsSuccessStatusCode)
-            {
-                string strData = response.Content.ReadAsStringAsync()
-                    .GetAwaiter()
-                    .GetResult();
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                };
-                classDetail = JsonSerializer.Deserialize<Class>(strData, options);
-                return classDetail;
-            }
-            else
-                classDetail = null;
-            if (classDetail == null)
-            {
-                ViewData["msg"] = "class doesn't exist";
-                return null;
-            }
-            else return classDetail;
-        }
+
 		List<Student>? GetStudentsByClassId(int id)
 		{
 			HttpResponseMessage response = client
 				.GetAsync("api/Class/GetStudentsByClassId/" + id)
 				.GetAwaiter().GetResult();
-			List<Student> students;
+			List<Student>? students;
 			if (response.IsSuccessStatusCode)
 			{
 				string strData = response.Content.ReadAsStringAsync()
@@ -148,75 +120,43 @@ namespace Client.Controllers
 			}
 			else
 				students = null;
-			if (students == null)
-			{
-				ViewData["msg"] = "class is empty";
-				return null;
-			}
-			else return students;
+			
+			return students;
 		}
-		List<Student>? GetStudents()
-		{
-			HttpResponseMessage response = client
-				.GetAsync("api/Student/GetStudents")
-				.GetAwaiter()
-				.GetResult();
-			List<Student> students;
-			if (response.IsSuccessStatusCode)
-			{
-				string strData = response.Content.ReadAsStringAsync()
-					.GetAwaiter()
-					.GetResult();
-				var options = new JsonSerializerOptions
-				{
-					PropertyNameCaseInsensitive = true
-				};
-                students = JsonSerializer.Deserialize<List<Student>>(strData, options);
-                return students;
-            }
-            else
-                students = null;
-            if (students == null)
-            {
-                ViewData["msg"] = "All Students are added";
-                return null;
-            }
-            else return students;
-        }
-		Student? GetStudentById(string id)
-		{
-			HttpResponseMessage response = client
-				.GetAsync("api/Student/GetStudentById/" + id)
-                .GetAwaiter()
-                .GetResult();
-			Student student;
-            if (response.IsSuccessStatusCode)
-            {
-                string strData = response.Content.ReadAsStringAsync()
-                    .GetAwaiter()
-                    .GetResult();
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                };
-                student = JsonSerializer.Deserialize<Student>(strData, options);
-                return student;
-            }
-            else
-                student = null;
-            if (student == null)
-            {
-                ViewData["msg"] = "Unable to find students";
-                return null;
-            }
-            else return student;
 
+		public IActionResult Index()
+        {
+            /*HttpResponseMessage response = await client.GetAsync(teacherApiUrl);
+			string strData = await response.Content.ReadAsStringAsync();
+
+			var options = new JsonSerializerOptions
+			{
+				PropertyNameCaseInsensitive = true
+			};
+			List<Teacher> teachers = JsonSerializer.Deserialize<List<Teacher>>(strData, options);*/
+            Teacher? teacher = GetTeacherFromSession();
+			if (teacher == null)
+				return Unauthorized();
+
+			List<Class>? classes = GetClassesByTeacherId(teacher.Id);
+            var viewModel = new TeacherViewModel
+			{
+                Teacher = teacher,
+                Classes = classes
+			};
+			
+            return View(viewModel);
         }
-		public async Task<IActionResult> ClassDetails(int id)
+        
+		public IActionResult ClassDetails(int id)
 		{
+			Teacher? teacher = GetTeacherFromSession();
+			if (teacher == null)
+				return Unauthorized();
 
 			Class? c = GetClassById(id);
-			/*if (c == null) return NotFound();*/
+			if (c == null) return NotFound();
+
 			List<Student> students = GetStudentsByClassId(c.Id);
 			List<Student> newStudents = GetStudents();
 			foreach (Student s in students)

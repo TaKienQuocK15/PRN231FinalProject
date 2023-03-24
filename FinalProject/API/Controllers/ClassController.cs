@@ -84,6 +84,8 @@ namespace API.Controllers
         public IActionResult GetClassById(int id)
         {
             var clss = dbContext.Classes.SingleOrDefault(c => c.Id == id);
+            if (clss == null)
+                return NotFound();
             return Ok(clss);
         }
 
