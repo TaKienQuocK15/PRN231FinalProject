@@ -58,7 +58,7 @@ namespace Client.Controllers
 				}
 				
 				HttpContext.Session.SetString("AccountSession", JsonSerializer.Serialize(a));
-				if (a.Role == 2)
+				if (a.Role == 1)
 					return RedirectToAction("Index", "Teacher");
 				else return RedirectToAction("Index", "Student");
 			}
