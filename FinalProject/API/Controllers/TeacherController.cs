@@ -30,7 +30,10 @@ namespace API.Controllers
         [Route("{id}")]
         public IActionResult GetTeacherById(int id)
         {
-            return Ok(dbContext.Teachers.FirstOrDefault(t => t.Id == id));
+            var teacher = dbContext.Teachers.FirstOrDefault(t => t.Id == id);
+            if (teacher == null)
+                return NotFound();
+			return Ok(teacher);
         }
         [HttpGet]
         [Route("{id}")]
