@@ -210,6 +210,7 @@ namespace Client.Controllers
                 return RedirectToAction("ClassDetails", new { id = classId });
             }
             else return BadRequest();
+
             /*return View();*/
         }
     }
