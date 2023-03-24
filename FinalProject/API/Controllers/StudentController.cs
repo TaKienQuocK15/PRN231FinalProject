@@ -21,6 +21,8 @@ namespace API.Controllers
         public IActionResult GetStudentById(string id)
         {
             var student = dbContext.Students.SingleOrDefault(s => s.Id.Equals(id));
+            if (student == null)
+                return NotFound();
             return Ok(student);
         }
         [HttpGet]

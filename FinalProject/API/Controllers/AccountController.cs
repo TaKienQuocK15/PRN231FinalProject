@@ -20,34 +20,46 @@ namespace API.Controllers
                 return NotFound();
             return Ok(account);
         }
+
         [HttpGet]
         [Route("{id}")]
         public IActionResult GetStudentByAccountId(int id)
         {
             var account = dbContext.Accounts.SingleOrDefault(a => a.Id == id);
+            if (account == null)
+                return NotFound();
+
             var student = dbContext.Students
                 .Select(s => new Student
                 {
                     Id = s.Id,
                     Name = s.Name
                 })
-                .SingleOrDefault(s => s.Id.Equals(account.StudentId))
-                ;
+                .SingleOrDefault(s => s.Id.Equals(account.StudentId));
+            if (student == null)
+                return NotFound();
+
             return Ok(student);
         }
+
         [HttpGet]
         [Route("{id}")]
         public IActionResult GetTeacherByAccountId(int id)
         {
             var account = dbContext.Accounts.SingleOrDefault(a => a.Id == id);
+            if (account == null) 
+                return NotFound();
+            
             var teacher = dbContext.Teachers
                 .Select(s => new Teacher
                 {
                     Id = s.Id,
                     Name = s.Name
                 })
-                .SingleOrDefault(s => s.Id.Equals(account.TeacherId))
-                ;
+                .SingleOrDefault(s => s.Id.Equals(account.TeacherId));
+            if (teacher == null)
+                return NotFound();
+            
             return Ok(teacher);
         }
     }

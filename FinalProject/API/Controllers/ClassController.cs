@@ -36,7 +36,9 @@ namespace API.Controllers
         [Route("{id}")]
         public IActionResult GetStudentsByClassId(int id)
         {
-            var studentList = dbContext.Classes.
+            try
+            {
+                var studentList = dbContext.Classes.
                 Include(s => s.Students).
                 SingleOrDefault(c => c.Id == id).
                 Students.Select(s => new Student
@@ -44,26 +46,28 @@ namespace API.Controllers
                     Id = s.Id,
                     Name = s.Name,
                 });
-            return Ok(studentList);
+                return Ok(studentList);
+            }
+            catch (Exception e)
+            {
+                return BadRequest();
+            }
         }
         
         [HttpPost]
         [Route("{studentId}/{classId}")]
         public IActionResult AddStudentToClass(string studentId, int classId)
         {
-            try
-            {
-                var student = dbContext.Students.SingleOrDefault(s => s.Id.Equals(studentId));
-                var clss = dbContext.Classes.SingleOrDefault(c => c.Id == classId);
-                clss.Students.Add(student);
-                student.Classes.Add(clss);
-                dbContext.SaveChanges();
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                return BadRequest();
-            }
+            var student = dbContext.Students.SingleOrDefault(s => s.Id.Equals(studentId));
+            if (student == null)
+                return NotFound();
+            var clss = dbContext.Classes.SingleOrDefault(c => c.Id == classId);
+            if (clss == null)
+                return NotFound();
+            clss.Students.Add(student);
+            student.Classes.Add(clss);
+            dbContext.SaveChanges();
+            return Ok();
         }
 
         [HttpPost]
@@ -84,6 +88,8 @@ namespace API.Controllers
         public IActionResult GetClassById(int id)
         {
             var clss = dbContext.Classes.SingleOrDefault(c => c.Id == id);
+            if (clss == null)
+                return NotFound();
             return Ok(clss);
         }
 
@@ -113,23 +119,22 @@ namespace API.Controllers
         [Route("{studentId}/{classId}")]
         public IActionResult RemoveStudentFromClass(string studentId, int classId)
         {
-            try
-            {
-                var clss = dbContext.Classes.SingleOrDefault(c => c.Id == classId);
-                List<Student> studentList = dbContext.Classes.
-                    Include(c => c.Students).
-                    SingleOrDefault(c => c.Id == classId).Students.ToList();
-                var student = studentList.SingleOrDefault(s => s.Id.Equals(studentId));
-                studentList.Remove(student);
-                student.Classes.Remove(clss);
-                dbContext.SaveChanges();
-                return Ok("Deleted");
-            }
-            catch(Exception e)
-            {
-                return BadRequest();
-            }
-            
+            var clss = dbContext.Classes.SingleOrDefault(c => c.Id == classId);
+            if (clss == null)
+                return NotFound();
+
+            List<Student> studentList = dbContext.Classes.
+                Include(c => c.Students).
+                SingleOrDefault(c => c.Id == classId).Students.ToList();
+            var student = studentList.SingleOrDefault(s => s.Id.Equals(studentId));
+            if (student == null)
+                return NotFound();
+
+            studentList.Remove(student);
+            student.Classes.Remove(clss);
+            dbContext.SaveChanges();
+            return Ok("Deleted");
+           
         }
     }
 }
