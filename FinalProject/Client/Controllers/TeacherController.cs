@@ -158,59 +158,13 @@ namespace Client.Controllers
 			if (c == null) return NotFound();
 
 			List<Student> students = GetStudentsByClassId(c.Id);
-			List<Student> newStudents = GetStudents();
-			foreach (Student s in students)
-			{
-				foreach (Student ns in newStudents)
-				{
-					if (s.Id.Equals(ns.Id))
-					{
-						newStudents.Remove(ns);
-						break;
-					}
-				}
-			}
 			var viewModel = new ClassViewModel
 			{
 				Class = c,
-				Students = students,
-				newStudents = newStudents
-			
+				Students = students
             };
             return View(viewModel);
 		}
 
-		public async Task<IActionResult> AddStudentToClass(string id, int id2)
-		{
-			string studentId = id;
-			int classId = id2;
-
-            HttpResponseMessage response = client
-                .PostAsync("api/Class/AddStudentToClass/" + studentId + "/" + classId, null)
-                .GetAwaiter()
-                .GetResult();
-			if (response.IsSuccessStatusCode)
-			{
-				return RedirectToAction("ClassDetails", new { id = classId });
-			}
-			else return BadRequest();
-            /*return View();*/
-		}
-        public async Task<IActionResult> RemoveStudentFromClass(string id, int id2)
-        {
-            string studentId = id;
-            int classId = id2;
-
-            HttpResponseMessage response = client
-                .DeleteAsync("api/Class/RemoveStudentFromClass/" + studentId + "/" + classId)
-                .GetAwaiter()
-                .GetResult();
-            if (response.IsSuccessStatusCode)
-            {
-                return RedirectToAction("ClassDetails", new { id = classId });
-            }
-            else return BadRequest();
-            /*return View();*/
-        }
     }
 }

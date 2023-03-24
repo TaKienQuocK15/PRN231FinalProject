@@ -21,6 +21,6 @@ app.UseSession();
 
 app.MapControllerRoute(
 	name: "default",
-	pattern: "{controller=SignIn}/{action=Index}/{id?}/{id2?}");
+	pattern: "{controller=SignIn}/{action=Index}/{id?}");
 
 app.Run();

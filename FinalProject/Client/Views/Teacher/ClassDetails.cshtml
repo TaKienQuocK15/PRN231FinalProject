@@ -36,53 +36,19 @@
         {
            <tr>
                <td>
-                   @Html.DisplayFor(s => item.Id)
+                   @Html.DisplayFor(s => item.Id);
                </td>
                 <td>
-                    @Html.DisplayFor(s => item.Name)
+                    @Html.DisplayFor(s => item.Name);
                 </td>
                 <td>
-                    @Html.ActionLink("Remove", "RemoveStudentFromClass", new{  id = item.Id, id2 = Model.Class.Id})
+                    @Html.ActionLink("Edit", "Edit", new{ /* id = item.PrimaryKey */})
+                    @Html.ActionLink("Details", "Details", new{  id = item.Id })
+                    @Html.ActionLink("Delete", "Delete", new{ /* id = item.PrimaryKey */})
                 </td>
             </tr> 
         }
-            
     </tbody>
-    </table>
-    <h3>Available Students</h3>
-    @if(Model.newStudents == null){
-        <p>all students are added</p>
-    }
-   
-    <table class="table">
-        <thead>
-            <tr>
-                <th>
-                    <p>Id</p>
-                </th>
-                <th>
-                    <p>Name</p>
-                </th>
-                <th>
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.newStudents)
-            {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(s => item.Id)  
-                    </td>
-                    <td>
-                        @Html.DisplayFor(s => item.Name)
-                    </td>
-                    <td>
-                        @Html.ActionLink("Add", "AddStudentToClass", new{  id = item.Id , id2 = Model.Class.Id})
-                    </td>
-                </tr>
-            }
-        </tbody>
     </table>
 </div>
 
