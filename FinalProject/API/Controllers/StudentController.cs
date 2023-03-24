@@ -25,6 +25,7 @@ namespace API.Controllers
                 return NotFound();
             return Ok(student);
         }
+
         [HttpGet]
         [Route("{id}")]
         public IActionResult GetClassesByStudentId(string id)
@@ -39,6 +40,7 @@ namespace API.Controllers
                 });
             return Ok(studentList);
         }
+
         [HttpPost]
         public IActionResult AddStudent(Student s)
             {

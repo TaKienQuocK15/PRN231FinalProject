@@ -1,0 +1,30 @@
+﻿@model Client.Controllers.SignUpModel
+
+<div id="form">
+    <div id="form-title">
+        <span><a href="~/signin/signup" style="color: red;">SIGN UP</a></span>
+        <span><a href="~/signin/index">SIGN IN</a></span>
+    </div>
+
+    <div id="form-content">
+        <div class="msg-error" style="text-align:left">
+            @ViewData["msg"]
+        </div>
+        <form method="post">
+            <label>Student ID<span style="color: red;">*</span></label><br />
+            <input asp-for="StudentId" /><br />
+            <span class="msg-error" asp-validation-for="StudentId"></span><br />
+            <label>Student Name<span style="color: red;">*</span></label><br />
+            <input asp-for="StudentName" /><br />
+            <span class="msg-error" asp-validation-for="StudentName"></span><br />
+            <label>Email<span style="color: red;">*</span></label><br />
+            <input asp-for="Email" /><br />
+            <span class="msg-error" asp-validation-for="Email"></span><br />
+            <label>Password<span style="color: red;">*</span></label><br />
+            <input asp-for="Password" /><br />
+            <span class="msg-error" asp-validation-for="Password"></span><br />
+            <div></div>
+            <input type="submit" value="SIGN UP" style="margin-bottom: 30px;" />
+        </form>
+    </div>
+</div>
