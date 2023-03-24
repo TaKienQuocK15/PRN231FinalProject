@@ -62,5 +62,13 @@ namespace API.Controllers
             
             return Ok(teacher);
         }
+
+        [HttpPost]
+        public IActionResult AddAccount(Account account)
+        {
+            dbContext.Accounts.Add(account);
+            dbContext.SaveChanges();
+            return Ok();
+        }
     }
 }
