@@ -19,22 +19,22 @@ public partial class Prn231dbContext : DbContext
 
     public virtual DbSet<Class> Classes { get; set; }
 
+    public virtual DbSet<Resource> Resources { get; set; }
+
     public virtual DbSet<Student> Students { get; set; }
 
     public virtual DbSet<Teacher> Teachers { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-        IConfigurationRoot configuration = builder.Build();
-        optionsBuilder.UseSqlServer(configuration.GetConnectionString("MyStoreDB"));
+	{
+		var builder = new ConfigurationBuilder()
+				.SetBasePath(Directory.GetCurrentDirectory())
+				.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+		IConfigurationRoot configuration = builder.Build();
+		optionsBuilder.UseSqlServer(configuration.GetConnectionString("MyStoreDB"));
+	}
 
-    }
-
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+	protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Account>(entity =>
         {
@@ -89,6 +89,21 @@ public partial class Prn231dbContext : DbContext
                             .HasMaxLength(8)
                             .IsFixedLength();
                     });
+        });
+
+        modelBuilder.Entity<Resource>(entity =>
+        {
+            entity.ToTable("Resource");
+
+            entity.Property(e => e.ContentType).HasMaxLength(500);
+            entity.Property(e => e.Name).HasMaxLength(50);
+            entity.Property(e => e.Path).HasMaxLength(500);
+            entity.Property(e => e.UploadDate).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Class).WithMany(p => p.Resources)
+                .HasForeignKey(d => d.ClassId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Resource_Class");
         });
 
         modelBuilder.Entity<Student>(entity =>

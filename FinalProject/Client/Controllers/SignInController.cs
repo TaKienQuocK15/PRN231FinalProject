@@ -1,4 +1,5 @@
-﻿using Client.Models;
+﻿using Azure;
+using Client.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Headers;
@@ -143,27 +144,29 @@ namespace Client.Controllers
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public IActionResult AddFile([Bind]AddFileModel data)
+		public IActionResult AddFile([Bind]AddResourceModel data)
 		{
-			string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Files");
-			if (!Directory.Exists(path))
-				Directory.CreateDirectory(path);
-
-			string oldName = data.File.FileName;
-			string fileName = oldName.Insert(oldName.LastIndexOf("."), "_1");
-			string fileNameWithPath = Path.Combine(path, fileName);
-			using (var stream = new FileStream(fileNameWithPath, FileMode.Create))
+			data.Name = "Test";
+			using (var content = new MultipartFormDataContent())
 			{
-				data.File.CopyTo(stream);
+				content.Add(new StringContent(data.Name), nameof(data.Name));
+				content.Add(new StreamContent(data.File.OpenReadStream())
+				{
+					Headers =
+					{
+						ContentLength = data.File.Length,
+						ContentType = new MediaTypeHeaderValue(data.File.ContentType)
+					}
+				}, nameof(data.File), data.File.FileName);
+
+				HttpResponseMessage response = client.PostAsync("api/resource/AddResource/5", content)
+					.GetAwaiter().GetResult();
+
+				if (response.IsSuccessStatusCode)
+					return View();
+				else return BadRequest();
 			}
-
-			return View();
 		}
-	}
-
-	public class AddFileModel
-	{
-		public IFormFile File { get; set; }
 	}
 
 	public class SignUpModel

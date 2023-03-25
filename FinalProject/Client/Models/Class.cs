@@ -11,6 +11,8 @@ public partial class Class
 
     public int TeacherId { get; set; }
 
+    public virtual ICollection<Resource> Resources { get; } = new List<Resource>();
+
     public virtual Teacher Teacher { get; set; } = null!;
 
     public virtual ICollection<Student> Students { get; } = new List<Student>();
