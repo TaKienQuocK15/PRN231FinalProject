@@ -48,5 +48,56 @@ namespace API.Controllers
 
 			return Ok();
 		}
+
+		[HttpGet]
+		[Route("{classId}")]
+		public IActionResult GetResourcesFromClass(int classId)
+		{
+			var clss = db.Classes.SingleOrDefault(c => c.Id == classId);
+			if (clss == null)
+				return NotFound();
+
+			List<Resource> resources = db.Resources.Where(r => r.ClassId == classId)
+				.Select(r => new Resource
+				{
+					Id = r.Id,
+					UploadDate = r.UploadDate,
+					Path = r.Path,
+					Name = r.Name,
+					ContentType = r.ContentType,
+					ClassId = r.ClassId
+				}).ToList();
+			return Ok(resources);
+		}
+
+		[HttpGet]
+		[Route("{id}")]
+		public IActionResult GetResourceById(int id)
+		{
+			var resource = db.Resources.SingleOrDefault(r => r.Id == id);
+			if (resource == null)
+				return NotFound();
+
+			string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Files", resource.Path);
+			byte[] b = System.IO.File.ReadAllBytes(path);
+			return File(b, resource.ContentType, resource.Path);
+		}
+
+		[HttpDelete]
+		[Route("{id}")]
+		public IActionResult RemoveResourceById(int id)
+		{
+			var resource = db.Resources.SingleOrDefault(r => r.Id == id);
+			if (resource == null)
+				return NotFound();
+
+			string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Files", resource.Path);
+			System.IO.File.Delete(path);
+
+			db.Resources.Remove(resource);
+			db.SaveChanges();
+
+			return Ok();
+		}
 	}
 }

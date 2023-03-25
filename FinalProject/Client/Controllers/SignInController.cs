@@ -146,7 +146,6 @@ namespace Client.Controllers
 		[ValidateAntiForgeryToken]
 		public IActionResult AddFile([Bind]AddResourceModel data)
 		{
-			data.Name = "Test";
 			using (var content = new MultipartFormDataContent())
 			{
 				content.Add(new StringContent(data.Name), nameof(data.Name));
