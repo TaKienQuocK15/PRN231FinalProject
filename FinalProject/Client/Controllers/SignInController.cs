@@ -1,4 +1,5 @@
-﻿using Client.Models;
+﻿using Azure;
+using Client.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Headers;
@@ -16,17 +17,6 @@ namespace Client.Controllers
 			var contentType = new MediaTypeWithQualityHeaderValue("application/json");
 			client.BaseAddress = new Uri("http://localhost:5143/");
 			client.DefaultRequestHeaders.Accept.Add(contentType);
-
-			//Student = new Student()
-			//{
-			//	Id = "HE000000",
-			//	Name = "Default"
-			//};
-			//Account = new Account()
-			//{
-			//	Email = "Default",
-			//	Password = "Default"
-			//};
 		}
 		
 		Account? GetAccountByEmail(string email)
@@ -145,6 +135,36 @@ namespace Client.Controllers
 				.GetAwaiter().GetResult();
 
 			return RedirectToAction("Index");
+		}
+
+		public IActionResult AddFile()
+		{
+			return View();
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public IActionResult AddFile([Bind]AddResourceModel data)
+		{
+			using (var content = new MultipartFormDataContent())
+			{
+				content.Add(new StringContent(data.Name), nameof(data.Name));
+				content.Add(new StreamContent(data.File.OpenReadStream())
+				{
+					Headers =
+					{
+						ContentLength = data.File.Length,
+						ContentType = new MediaTypeHeaderValue(data.File.ContentType)
+					}
+				}, nameof(data.File), data.File.FileName);
+
+				HttpResponseMessage response = client.PostAsync("api/resource/AddResource/5", content)
+					.GetAwaiter().GetResult();
+
+				if (response.IsSuccessStatusCode)
+					return View();
+				else return BadRequest();
+			}
 		}
 	}
 
