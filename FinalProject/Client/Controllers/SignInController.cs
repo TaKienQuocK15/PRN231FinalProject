@@ -16,17 +16,6 @@ namespace Client.Controllers
 			var contentType = new MediaTypeWithQualityHeaderValue("application/json");
 			client.BaseAddress = new Uri("http://localhost:5143/");
 			client.DefaultRequestHeaders.Accept.Add(contentType);
-
-			//Student = new Student()
-			//{
-			//	Id = "HE000000",
-			//	Name = "Default"
-			//};
-			//Account = new Account()
-			//{
-			//	Email = "Default",
-			//	Password = "Default"
-			//};
 		}
 		
 		Account? GetAccountByEmail(string email)
@@ -146,6 +135,35 @@ namespace Client.Controllers
 
 			return RedirectToAction("Index");
 		}
+
+		public IActionResult AddFile()
+		{
+			return View();
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public IActionResult AddFile([Bind]AddFileModel data)
+		{
+			string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Files");
+			if (!Directory.Exists(path))
+				Directory.CreateDirectory(path);
+
+			string oldName = data.File.FileName;
+			string fileName = oldName.Insert(oldName.LastIndexOf("."), "_1");
+			string fileNameWithPath = Path.Combine(path, fileName);
+			using (var stream = new FileStream(fileNameWithPath, FileMode.Create))
+			{
+				data.File.CopyTo(stream);
+			}
+
+			return View();
+		}
+	}
+
+	public class AddFileModel
+	{
+		public IFormFile File { get; set; }
 	}
 
 	public class SignUpModel

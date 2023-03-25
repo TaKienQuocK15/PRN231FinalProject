@@ -1,0 +1,8 @@
+﻿@model Client.Controllers.AddFileModel
+
+<form method="post" enctype="multipart/form-data" id="file-form">
+    <label for="upload-file">Import file</label><br />
+    <input type="file" asp-for="File" id="upload-file"/><br />
+    @Html.AntiForgeryToken()
+    <input type="submit" value="SUBMIT" /><br />
+</form>
