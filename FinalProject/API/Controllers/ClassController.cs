@@ -70,7 +70,21 @@ namespace API.Controllers
             return Ok();
         }
 
+        /*[HttpPost]
+        [Route("{tId}/{name}")]
+        public IActionResult AddClass(string name, int tId)
+        {
+            var newClass = new Class()
+            {
+                Name = name,
+                TeacherId = tId
+            };
+            dbContext.Classes.Add(newClass);
+            dbContext.SaveChanges();
+            return Ok(newClass);
+        }*/
         [HttpPost]
+        [Route("{tId}")]
         public IActionResult AddClass(Class c, int tId)
         {
             var newClass = new Class()

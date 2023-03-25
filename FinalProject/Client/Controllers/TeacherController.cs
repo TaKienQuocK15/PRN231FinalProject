@@ -234,6 +234,72 @@ namespace Client.Controllers
 			else return BadRequest();
 		}
 
+		public IActionResult DeleteClass(int id)
+		{
+            Teacher? teacher = GetTeacherFromSession();
+            if (teacher == null)
+                return Unauthorized();
+			Class? clss = GetClassById(id);
+			if (clss == null)
+				return Unauthorized();
+			return View(clss);
+        }
+
+        [HttpPost, ActionName("DeleteClass")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            HttpResponseMessage response = client
+				.PostAsync("api/Class/DeleteClass/" + id, null)
+				.GetAwaiter()
+				.GetResult();
+            if (response.IsSuccessStatusCode)
+                return RedirectToAction("Index");
+            else return BadRequest();
+        }
+        public IActionResult AddClass()
+		{
+            Teacher? teacher = GetTeacherFromSession();
+            if (teacher == null)
+                return Unauthorized();
+			ViewData["Teacher"] = new Teacher()
+			{
+				Id = teacher.Id,
+				Name = teacher.Name
+			};
+			return View();
+
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddClass([Bind("Name")] Class c)
+        {
+            Teacher? teacher = GetTeacherFromSession();
+            if (teacher == null)
+                return Unauthorized();
+			Class clss = new Class()
+			{
+				Id = c.Id,
+				Name = c.Name,
+				TeacherId = c.TeacherId,
+				Teacher = new Teacher
+				{
+					Id = 0,
+					Name = ""
+				}
+			};
+			HttpResponseMessage response = client
+				.PostAsJsonAsync("api/Class/AddClass/" + teacher.Id, clss )
+				.GetAwaiter()
+				.GetResult();
+			if (response.IsSuccessStatusCode)
+			{
+				return RedirectToAction("Index");
+			}
+			else return BadRequest();
+        }
+
         public IActionResult RemoveStudentFromClass(string id, int id2)
         {
 			Teacher? teacher = GetTeacherFromSession();
