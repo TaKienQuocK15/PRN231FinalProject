@@ -1,13 +1,14 @@
 ﻿
-@model Client.Models.TeacherViewModel;
+@model TeacherViewModel;
 
 
 <h1>Teacher index</h1>
 <p>Hello @Model.Teacher.Name</p>
+<p>@Html.ActionLink("Add Class", "AddClass", new {id = Model.Teacher.Id})</p>
 <ul>
 @foreach(var item in Model.Classes){
     <li>
-        @Html.ActionLink(item.Name, "ClassDetails", new{id = item.Id})
+            @Html.ActionLink(item.Name, "ClassDetails", new{id = item.Id}) | @Html.ActionLink("Delete", "DeleteClass", new{id = item.Id})
     </li>
     }
 </ul>

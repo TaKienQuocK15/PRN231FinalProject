@@ -71,16 +71,16 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddClass(Class c, int tId)
+        public IActionResult AddClass(Class c)
         {
             var newClass = new Class()
             {
                 Name = c.Name,
-                TeacherId = tId
+                TeacherId = c.TeacherId
             };
             dbContext.Classes.Add(newClass);
             dbContext.SaveChanges();
-            return Ok(newClass);
+            return Ok(c);
         }
 
         [HttpGet]
