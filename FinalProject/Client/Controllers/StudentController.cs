@@ -9,7 +9,16 @@ namespace Client.Controllers
 	public class StudentController : Controller
 	{
         private readonly HttpClient client = null;
-        List<Class>? GetClassesByStudentId(string id)
+
+		public StudentController()
+		{
+			client = new HttpClient();
+			var contentType = new MediaTypeWithQualityHeaderValue("application/json");
+			client.BaseAddress = new Uri("http://localhost:5143/");
+			client.DefaultRequestHeaders.Accept.Add(contentType);
+		}
+
+		List<Class>? GetClassesByStudentId(string id)
         {
             HttpResponseMessage response = client
                 .GetAsync("api/Student/GetClassesByStudentId/" + id)
@@ -58,6 +67,7 @@ namespace Client.Controllers
             else student = null;
             return student;
         }
+        
         Class? GetClassById(int id)
         {
             HttpResponseMessage response = client
@@ -81,13 +91,47 @@ namespace Client.Controllers
 
             return classDetail;
         }
-        public StudentController()
-        {
-            client = new HttpClient();
-            var contentType = new MediaTypeWithQualityHeaderValue("application/json");
-            client.BaseAddress = new Uri("http://localhost:5143/");
-            client.DefaultRequestHeaders.Accept.Add(contentType);
-        }
+
+		List<Resource>? GetResourcesFromClass(int classId)
+		{
+			HttpResponseMessage response = client
+				.GetAsync("api/Resource/GetResourcesFromClass/" + classId)
+				.Result;
+			List<Resource>? resources;
+			if (response.IsSuccessStatusCode)
+			{
+				string strData = response.Content.ReadAsStringAsync().Result;
+				var options = new JsonSerializerOptions
+				{
+					PropertyNameCaseInsensitive = true
+				};
+				resources = JsonSerializer.Deserialize<List<Resource>>(strData, options);
+			}
+			else resources = null;
+
+			return resources;
+		}
+
+		Resource? GetResourceDataFromId(int id)
+		{
+			HttpResponseMessage response = client
+				.GetAsync("api/Resource/GetResourceDataById/" + id)
+				.Result;
+			Resource? resource;
+			if (response.IsSuccessStatusCode)
+			{
+				string strData = response.Content.ReadAsStringAsync().Result;
+				var options = new JsonSerializerOptions
+				{
+					PropertyNameCaseInsensitive = true
+				};
+				resource = JsonSerializer.Deserialize<Resource>(strData, options);
+			}
+			else resource = null;
+
+			return resource;
+		}
+        
         public IActionResult Index()
 		{
             Student? student = GetStudentFromSession();
@@ -107,11 +151,37 @@ namespace Client.Controllers
             Student? student = GetStudentFromSession();
             if (student == null)
                 return Unauthorized();
+            
             Class? clss = GetClassById(id);
             if (clss == null)
-                return Unauthorized();
-            return View(clss);
+                return NotFound();
+
+			List<Resource> resources = GetResourcesFromClass(id);
+			ViewData["resources"] = resources;
+
+			return View(clss);
         }
 
-    }
+		public IActionResult DownloadResource(int id)
+		{
+			Student? student = GetStudentFromSession();
+			if (student == null)
+				return Unauthorized();
+
+			Resource? data = GetResourceDataFromId(id);
+			if (data == null)
+				return NotFound();
+
+			HttpResponseMessage response = client
+				.GetAsync("api/Resource/GetResourceFileById/" + id).Result;
+			if (response.IsSuccessStatusCode)
+			{
+				var stream = response.Content.ReadAsStream();
+				string name = data.Path;
+				string contentType = data.ContentType;
+				return File(stream, contentType, name);
+			}
+			else return NotFound();
+		}
+	}
 }
