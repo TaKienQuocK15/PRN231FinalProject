@@ -136,36 +136,6 @@ namespace Client.Controllers
 
 			return RedirectToAction("Index");
 		}
-
-		public IActionResult AddFile()
-		{
-			return View();
-		}
-
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public IActionResult AddFile([Bind]AddResourceModel data)
-		{
-			using (var content = new MultipartFormDataContent())
-			{
-				content.Add(new StringContent(data.Name), nameof(data.Name));
-				content.Add(new StreamContent(data.File.OpenReadStream())
-				{
-					Headers =
-					{
-						ContentLength = data.File.Length,
-						ContentType = new MediaTypeHeaderValue(data.File.ContentType)
-					}
-				}, nameof(data.File), data.File.FileName);
-
-				HttpResponseMessage response = client.PostAsync("api/resource/AddResource/5", content)
-					.GetAwaiter().GetResult();
-
-				if (response.IsSuccessStatusCode)
-					return View();
-				else return BadRequest();
-			}
-		}
 	}
 
 	public class SignUpModel

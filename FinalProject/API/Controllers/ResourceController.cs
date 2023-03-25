@@ -72,7 +72,17 @@ namespace API.Controllers
 
 		[HttpGet]
 		[Route("{id}")]
-		public IActionResult GetResourceById(int id)
+		public IActionResult GetResourceDataById(int id)
+		{
+			var resource = db.Resources.SingleOrDefault(r => r.Id == id);
+			if (resource == null)
+				return NotFound();
+			return Ok(resource);
+		}
+
+		[HttpGet]
+		[Route("{id}")]
+		public IActionResult GetResourceFileById(int id)
 		{
 			var resource = db.Resources.SingleOrDefault(r => r.Id == id);
 			if (resource == null)

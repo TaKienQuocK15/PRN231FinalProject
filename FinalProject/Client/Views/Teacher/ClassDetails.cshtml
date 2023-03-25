@@ -1,5 +1,7 @@
 ﻿@model Client.Models.ClassViewModel;
-
+@{
+    List<Resource> resources = (List<Resource>)ViewData["resources"];
+}
 
 <h1>Class Details</h1>
 <div>
@@ -20,6 +22,45 @@
             @Html.DisplayFor(model => model.Class.Name)
         </dd>
     </dl>
+    <h3>Resources</h3>
+    <a href="../AddResource/@Model.Class.Id">Add Resource</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    <p>Name</p>
+                </th>
+                <th>
+                    <p>Upload Date</p>
+                </th>
+                <th>
+                    <p>Download</p>
+                </th>
+                <th>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Resource r in resources)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(s => r.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(s => r.UploadDate)
+                    </td>
+                    <td>
+                        @Html.ActionLink(r.Path, "DownloadResource", new { id = r.Id })
+                    </td>
+                    <td>
+                        @Html.ActionLink("Remove", "RemoveResource", new { id = r.Id })
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
     <table class="table">
     <thead>
         <tr>
