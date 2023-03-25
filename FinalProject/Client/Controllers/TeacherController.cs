@@ -273,13 +273,24 @@ namespace Client.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult AddClass([Bind("Name, TeacherId")] Class c)
+        public IActionResult AddClass([Bind("Name")] Class c)
         {
             Teacher? teacher = GetTeacherFromSession();
             if (teacher == null)
                 return Unauthorized();
+			Class clss = new Class()
+			{
+				Id = c.Id,
+				Name = c.Name,
+				TeacherId = c.TeacherId,
+				Teacher = new Teacher
+				{
+					Id = 0,
+					Name = ""
+				}
+			};
 			HttpResponseMessage response = client
-				.PostAsJsonAsync("api/Class/AddClass", c)
+				.PostAsJsonAsync("api/Class/AddClass/" + teacher.Id, clss )
 				.GetAwaiter()
 				.GetResult();
 			if (response.IsSuccessStatusCode)
@@ -308,8 +319,5 @@ namespace Client.Controllers
             }
             else return BadRequest();
         }
-		
-		
-        
     }
 }
