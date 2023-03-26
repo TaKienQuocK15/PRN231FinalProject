@@ -3,25 +3,13 @@
     List<Resource> resources = (List<Resource>)ViewData["resources"];
 }
 
-<h1>Class Details</h1>
+<h1>Class @Model.Class.Name</h1>
 <div>
-    <a asp-action="Index">Return to List page</a>
+    <a asp-action="Index">Return to Class List page</a>
 </div>
+<br />
+
 <div>
-    <dl class="row">
-        <dt class="col-sm-4">
-            @Html.DisplayNameFor(model => model.Class.Id)
-        </dt>
-        <dd class="col-sm-8">
-            @Html.DisplayFor(model => model.Class.Id)
-        </dd>
-        <dt class="col-sm-4">
-            @Html.DisplayNameFor(model => model.Class.Name)
-        </dt>
-        <dd class="col-sm-8">
-            @Html.DisplayFor(model => model.Class.Name)
-        </dd>
-    </dl>
     <h3>Resources</h3>
     <a href="../AddResource/@Model.Class.Id">Add Resource</a>
     <table class="table">
@@ -61,6 +49,9 @@
 
         </tbody>
     </table>
+    <br />
+
+    <h3>Students in Class</h3>
     <table class="table">
     <thead>
         <tr>
@@ -92,6 +83,8 @@
             
     </tbody>
     </table>
+    <br />
+
     <h3>Available Students</h3>
     @if(Model.newStudents == null){
         <p>all students are added</p>
