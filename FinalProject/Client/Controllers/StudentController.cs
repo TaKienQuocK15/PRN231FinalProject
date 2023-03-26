@@ -156,6 +156,19 @@ namespace Client.Controllers
             if (clss == null)
                 return NotFound();
 
+            var classes = GetClassesByStudentId(student.Id);
+            bool authorized = false;
+            foreach (var c in classes)
+            {
+                if (c.Id == clss.Id)
+                {
+                    authorized = true;
+                    break;
+                }
+            }
+            if (!authorized)
+                return Unauthorized();
+
 			List<Resource> resources = GetResourcesFromClass(id);
 			ViewData["resources"] = resources;
 
@@ -171,6 +184,23 @@ namespace Client.Controllers
 			Resource? data = GetResourceDataFromId(id);
 			if (data == null)
 				return NotFound();
+
+			Class? clss = GetClassById(data.ClassId);
+            if (clss != null)
+            {
+				var classes = GetClassesByStudentId(student.Id);
+				bool authorized = false;
+				foreach (var c in classes)
+				{
+					if (c.Id == clss.Id)
+					{
+						authorized = true;
+						break;
+					}
+				}
+				if (!authorized)
+					return Unauthorized();
+			}
 
 			HttpResponseMessage response = client
 				.GetAsync("api/Resource/GetResourceFileById/" + id).Result;

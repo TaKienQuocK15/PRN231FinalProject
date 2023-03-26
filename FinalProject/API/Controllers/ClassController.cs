@@ -64,9 +64,17 @@ namespace API.Controllers
             var clss = dbContext.Classes.SingleOrDefault(c => c.Id == classId);
             if (clss == null)
                 return NotFound();
-            clss.Students.Add(student);
-            student.Classes.Add(clss);
-            dbContext.SaveChanges();
+            try
+            {
+				clss.Students.Add(student);
+				student.Classes.Add(clss);
+				dbContext.SaveChanges();
+			}
+            catch (Exception e)
+            {
+                return BadRequest();
+            }
+            
             return Ok();
         }
 

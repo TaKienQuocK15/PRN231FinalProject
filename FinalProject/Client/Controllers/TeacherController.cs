@@ -231,6 +231,9 @@ namespace Client.Controllers
 			if (c == null)
 				return NotFound();
 
+			if (c.TeacherId != teacher.Id)
+				return Unauthorized();
+
 			List<Resource> resources = GetResourcesFromClass(id);
 			ViewData["resources"] = resources;
 
@@ -263,6 +266,13 @@ namespace Client.Controllers
 			if (teacher == null)
 				return Unauthorized();
 
+			Class? clss = GetClassById(id2);
+			if (clss != null)
+			{
+				if (clss.TeacherId != teacher.Id)
+					return Unauthorized();
+			}
+
 			string studentId = id;
 			int classId = id2;
 
@@ -282,9 +292,14 @@ namespace Client.Controllers
             Teacher? teacher = GetTeacherFromSession();
             if (teacher == null)
                 return Unauthorized();
+
 			Class? clss = GetClassById(id);
 			if (clss == null)
+				return NotFound();
+
+			if (clss.TeacherId != teacher.Id)
 				return Unauthorized();
+
 			return View(clss);
         }
 
@@ -350,6 +365,13 @@ namespace Client.Controllers
 			if (teacher == null)
 				return Unauthorized();
 
+			Class? clss = GetClassById(id2);
+			if (clss != null)
+			{
+				if (clss.TeacherId != teacher.Id)
+					return Unauthorized();
+			}
+
 			string studentId = id;
             int classId = id2;
 
@@ -374,6 +396,13 @@ namespace Client.Controllers
 			if (data == null)
 				return NotFound();
 
+			Class? clss = GetClassById(data.ClassId);
+			if (clss != null)
+			{
+				if (clss.TeacherId != teacher.Id)
+					return Unauthorized();
+			}
+
 			HttpResponseMessage response = client
 				.DeleteAsync("api/Resource/RemoveResourceById/" + id).Result;
 			if (response.IsSuccessStatusCode)
@@ -393,6 +422,13 @@ namespace Client.Controllers
 			if (data == null)
 				return NotFound();
 
+			Class? clss = GetClassById(data.ClassId);
+			if (clss != null)
+			{
+				if (clss.TeacherId != teacher.Id)
+					return Unauthorized();
+			}
+
 			HttpResponseMessage response = client
 				.GetAsync("api/Resource/GetResourceFileById/" + id).Result;
 			if (response.IsSuccessStatusCode)
@@ -407,6 +443,17 @@ namespace Client.Controllers
 
 		public IActionResult AddResource(int id)
 		{
+			Teacher? teacher = GetTeacherFromSession();
+			if (teacher == null)
+				return Unauthorized();
+
+			Class? clss = GetClassById(id);
+			if (clss == null)
+				return NotFound();
+			
+			if (clss.TeacherId != teacher.Id)
+					return Unauthorized();
+
 			ViewData["classId"] = id;
 			return View();
 		}
