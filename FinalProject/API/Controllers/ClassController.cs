@@ -115,12 +115,21 @@ namespace API.Controllers
             List<Student> studentList = dbContext.Classes.
                 Include(c => c.Students).
                 SingleOrDefault(c => c.Id == classId).Students.ToList();
+            List<Resource> resources = dbContext.Resources.Where(r => r.ClassId == classId).ToList();
 
             foreach(Student s in studentList.ToList())
             {
-
                 studentList.Remove(s);
                 s.Classes.Remove(clss);
+                dbContext.SaveChanges();
+            }
+
+            foreach (Resource r in resources.ToList())
+            {
+				string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Files", r.Path);
+				System.IO.File.Delete(path);
+				dbContext.Resources.Remove(r);
+				clss.Resources.Remove(r);
                 dbContext.SaveChanges();
             }
             

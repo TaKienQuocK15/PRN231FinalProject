@@ -300,6 +300,7 @@ namespace Client.Controllers
                 return RedirectToAction("Index");
             else return BadRequest();
         }
+
         public IActionResult AddClass()
 		{
             Teacher? teacher = GetTeacherFromSession();
