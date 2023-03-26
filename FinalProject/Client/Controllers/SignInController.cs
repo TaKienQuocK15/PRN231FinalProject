@@ -136,6 +136,12 @@ namespace Client.Controllers
 
 			return RedirectToAction("Index");
 		}
+
+		public IActionResult LogOut()
+		{
+			HttpContext.Session.Remove("AccountSession");
+			return RedirectToAction("Index");
+		}
 	}
 
 	public class SignUpModel
