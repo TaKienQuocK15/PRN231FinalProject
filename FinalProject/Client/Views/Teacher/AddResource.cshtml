@@ -1,10 +1,13 @@
 ﻿@model Client.Models.AddResourceModel
+@{
+    int classId = (int)ViewData["classId"];
+}
 
-<h1>Create</h1>
+<h1>Add Resource</h1>
 
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="AddFile" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="mb-3">
                 <label asp-for="Name" class="col-form-label"></label>
@@ -25,5 +28,5 @@
 </div>
 
 <div>
-    <a asp-action="Index">Return to Index page</a>
+    <a href="../ClassDetails/@classId">Return to Class page</a>
 </div>

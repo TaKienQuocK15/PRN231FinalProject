@@ -10,6 +10,14 @@ namespace Client.Controllers
 	{
         private readonly HttpClient client = null;
 
+		public TeacherController()
+		{
+			client = new HttpClient();
+			var contentType = new MediaTypeWithQualityHeaderValue("application/json");
+			client.BaseAddress = new Uri("http://localhost:5143/");
+			client.DefaultRequestHeaders.Accept.Add(contentType);
+		}
+
 		Teacher? GetTeacherFromSession()
 		{
 			string str = HttpContext.Session.GetString("AccountSession");
@@ -157,15 +165,47 @@ namespace Client.Controllers
 
 		}
 
-		public TeacherController()
+		List<Resource>? GetResourcesFromClass(int classId)
 		{
-            client = new HttpClient();
-            var contentType = new MediaTypeWithQualityHeaderValue("application/json");
-            client.BaseAddress = new Uri("http://localhost:5143/");
-            client.DefaultRequestHeaders.Accept.Add(contentType);
-        }
+			HttpResponseMessage response = client
+				.GetAsync("api/Resource/GetResourcesFromClass/" + classId)
+				.Result;
+			List<Resource>? resources;
+			if (response.IsSuccessStatusCode)
+			{
+				string strData = response.Content.ReadAsStringAsync().Result;
+				var options = new JsonSerializerOptions
+				{
+					PropertyNameCaseInsensitive = true
+				};
+				resources = JsonSerializer.Deserialize<List<Resource>>(strData, options);
+			}
+			else resources = null;
 
-        public IActionResult Index()
+			return resources;
+		}
+
+		Resource? GetResourceDataFromId(int id)
+		{
+			HttpResponseMessage response = client
+				.GetAsync("api/Resource/GetResourceDataById/" + id)
+				.Result;
+			Resource? resource;
+			if (response.IsSuccessStatusCode)
+			{
+				string strData = response.Content.ReadAsStringAsync().Result;
+				var options = new JsonSerializerOptions
+				{
+					PropertyNameCaseInsensitive = true
+				};
+				resource = JsonSerializer.Deserialize<Resource>(strData, options);
+			}
+			else resource = null;
+
+			return resource;
+		}
+
+		public IActionResult Index()
         {
             Teacher? teacher = GetTeacherFromSession();
 			if (teacher == null)
@@ -182,7 +222,7 @@ namespace Client.Controllers
         }
         
 		public IActionResult ClassDetails(int id)
-		{
+		{	
 			Teacher? teacher = GetTeacherFromSession();
 			if (teacher == null)
 				return Unauthorized();
@@ -190,6 +230,12 @@ namespace Client.Controllers
 			Class? c = GetClassById(id);
 			if (c == null)
 				return NotFound();
+
+			if (c.TeacherId != teacher.Id)
+				return Unauthorized();
+
+			List<Resource> resources = GetResourcesFromClass(id);
+			ViewData["resources"] = resources;
 
 			List<Student> students = GetStudentsByClassId(c.Id);
 			List<Student> newStudents = GetStudents();
@@ -220,6 +266,13 @@ namespace Client.Controllers
 			if (teacher == null)
 				return Unauthorized();
 
+			Class? clss = GetClassById(id2);
+			if (clss != null)
+			{
+				if (clss.TeacherId != teacher.Id)
+					return Unauthorized();
+			}
+
 			string studentId = id;
 			int classId = id2;
 
@@ -239,9 +292,14 @@ namespace Client.Controllers
             Teacher? teacher = GetTeacherFromSession();
             if (teacher == null)
                 return Unauthorized();
+
 			Class? clss = GetClassById(id);
 			if (clss == null)
+				return NotFound();
+
+			if (clss.TeacherId != teacher.Id)
 				return Unauthorized();
+
 			return View(clss);
         }
 
@@ -257,6 +315,7 @@ namespace Client.Controllers
                 return RedirectToAction("Index");
             else return BadRequest();
         }
+
         public IActionResult AddClass()
 		{
             Teacher? teacher = GetTeacherFromSession();
@@ -306,6 +365,13 @@ namespace Client.Controllers
 			if (teacher == null)
 				return Unauthorized();
 
+			Class? clss = GetClassById(id2);
+			if (clss != null)
+			{
+				if (clss.TeacherId != teacher.Id)
+					return Unauthorized();
+			}
+
 			string studentId = id;
             int classId = id2;
 
@@ -319,5 +385,109 @@ namespace Client.Controllers
             }
             else return BadRequest();
         }
-    }
+
+		public IActionResult RemoveResource(int id)
+		{
+			Teacher? teacher = GetTeacherFromSession();
+			if (teacher == null)
+				return Unauthorized();
+
+			Resource? data = GetResourceDataFromId(id);
+			if (data == null)
+				return NotFound();
+
+			Class? clss = GetClassById(data.ClassId);
+			if (clss != null)
+			{
+				if (clss.TeacherId != teacher.Id)
+					return Unauthorized();
+			}
+
+			HttpResponseMessage response = client
+				.DeleteAsync("api/Resource/RemoveResourceById/" + id).Result;
+			if (response.IsSuccessStatusCode)
+			{
+				return RedirectToAction("ClassDetails", new { id = data.ClassId });
+			}
+			else return BadRequest();
+		}
+
+		public IActionResult DownloadResource(int id)
+		{
+			Teacher? teacher = GetTeacherFromSession();
+			if (teacher == null)
+				return Unauthorized();
+
+			Resource? data = GetResourceDataFromId(id);
+			if (data == null)
+				return NotFound();
+
+			Class? clss = GetClassById(data.ClassId);
+			if (clss != null)
+			{
+				if (clss.TeacherId != teacher.Id)
+					return Unauthorized();
+			}
+
+			HttpResponseMessage response = client
+				.GetAsync("api/Resource/GetResourceFileById/" + id).Result;
+			if (response.IsSuccessStatusCode)
+			{
+				var stream = response.Content.ReadAsStream();
+				string name = data.Path;
+				string contentType = data.ContentType;
+				return File(stream, contentType, name);
+			}
+			else return NotFound();
+		}
+
+		public IActionResult AddResource(int id)
+		{
+			Teacher? teacher = GetTeacherFromSession();
+			if (teacher == null)
+				return Unauthorized();
+
+			Class? clss = GetClassById(id);
+			if (clss == null)
+				return NotFound();
+			
+			if (clss.TeacherId != teacher.Id)
+					return Unauthorized();
+
+			ViewData["classId"] = id;
+			return View();
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public IActionResult AddResource(int id, [Bind] AddResourceModel data)
+		{
+			if (!ModelState.IsValid)
+			{
+				ViewData["classId"] = id;
+				return View(data);
+			}
+
+			using (var content = new MultipartFormDataContent())
+			{
+				content.Add(new StringContent(data.Name), nameof(data.Name));
+				content.Add(new StreamContent(data.File.OpenReadStream())
+				{
+					Headers =
+					{
+						ContentLength = data.File.Length,
+						ContentType = new MediaTypeHeaderValue(data.File.ContentType)
+					}
+				}, nameof(data.File), data.File.FileName);
+
+				HttpResponseMessage response = client
+					.PostAsync("api/resource/AddResource/" + id, content)
+					.GetAwaiter().GetResult();
+
+				if (response.IsSuccessStatusCode)
+					return RedirectToAction("ClassDetails", new { id = id });
+				else return BadRequest();
+			}
+		}
+	}
 }
